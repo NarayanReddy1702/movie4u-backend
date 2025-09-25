@@ -17,6 +17,9 @@ const authUser = new Schema({
         required:true,
          minLength: 6 
     },
+    profilePic:{
+        type:String,
+    },
      role: {
     type: String,
     enum: ["user", "admin"], 

@@ -20,12 +20,17 @@ async function authRegister(req, res) {
       return res.status(409).json({ message: "User already registered" });
     }
 
+     const index= Math.floor(Math.random()*100)+1;
+      const randowImage = `https://avatar.iran.liara.run/public/${index}.png`
+
+     
     const hasPassword = await bcrypt.hash(password, 10);
 
     const newUser = await User.create({
       username,
       email,
       password: hasPassword,
+      profilePic:randowImage
     });
 
     if (!newUser) {
@@ -69,6 +74,9 @@ async function authLogin(req, res) {
       res.status(404).json({ message: "Invalid email or password" });
     }
 
+    
+    
+
     const isMatch = await bcrypt.compare(password, existingUser.password);
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid email or password" });
@@ -102,4 +110,16 @@ async function authLogout(req, res) {
   }
 }
 
-export { authRegister, authLogin, authLogout };
+async function getUsers(req,res){
+   try {
+      const allUser = await User.find()
+      if(!allUser){
+        return res.status(409).json({message:"User not Found !"})
+      }
+      res.status(201).json({message:'All user get successfully !',success:true,allUser})
+   } catch (error) {
+      res.status(404).json({message:"Failed to get all user",success:false})
+   }
+
+}
+export { authRegister, authLogin, authLogout ,getUsers };
