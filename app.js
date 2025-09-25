@@ -3,11 +3,11 @@ import dotenv from "dotenv"
 import authRouter from "./router/auth.router.js"
 import movieRoter from "./router/movie.router.js"
 import cookieParser from "cookie-parser"
+import cors from "cors"
 
 const app=express()
-
 dotenv.config()
-
+app.use(cors())
 app.use(cookieParser())
 app.use(express.json())
 
