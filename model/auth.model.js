@@ -14,7 +14,8 @@ const authUser = new Schema({
     },
     password:{
         type:String,
-        required:true
+        required:true,
+         minLength: 6 
     },
      role: {
     type: String,
