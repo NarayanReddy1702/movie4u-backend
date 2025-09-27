@@ -91,7 +91,11 @@ async function authLogin(req, res) {
       process.env.JWT_SECRET
     );
 
-    res.cookie("token", token);
+   res.cookie("token", token, {
+  httpOnly: true,      // cannot be accessed by JS (safer)
+  secure: false,        // true in production with HTTPS
+  sameSite: "lax"       // allow requests from frontend origin
+});
 
     res
       .status(201)
