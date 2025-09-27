@@ -91,7 +91,7 @@ async function authLogin(req, res) {
       process.env.JWT_SECRET
     );
 
-    res.cookie("Token", token);
+    res.cookie("token", token);
 
     res
       .status(201)
