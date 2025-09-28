@@ -91,11 +91,12 @@ async function authLogin(req, res) {
       process.env.JWT_SECRET
     );
 
-   res.cookie("token", token, {
-  httpOnly: true,      // cannot be accessed by JS (safer)
-  secure: false,        // true in production with HTTPS
-  sameSite: "lax"       // allow requests from frontend origin
-});
+ res.cookie("token", token,{
+       httpOnly: true,
+      secure: process.env.NODE_ENV === "production", // true only in prod (HTTPS)
+      sameSite: "strict",
+      maxAge: 60 * 60 * 1000, // 1 hour in ms
+    });
 
     res
       .status(201)
