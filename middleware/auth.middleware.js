@@ -1,8 +1,9 @@
 import jwt from "jsonwebtoken" 
+import User from "../model/auth.model.js";
 
-function authMiddleware(req, res, next) {
+async function authMiddleware(req, res, next) {
     try{
-  const token = req.cookies?.token;
+  const token = req.cookie?.token;
    console.log(token);
    
   if (!token) {
@@ -10,8 +11,9 @@ function authMiddleware(req, res, next) {
   }
    
   const decoded = jwt.verify(token,process.env.JWT_SECRET)
-   req.user = decoded;
-    next(); // pass control to next middleware/route
+  const user = await User.findOne({email:decoded.email})
+   req.user = user;
+  next(); // pass control to next middleware/route
   } catch (err) {
     return res.status(403).json({ message: "Invalid or expired token" });
   }
