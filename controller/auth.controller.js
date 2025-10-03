@@ -107,6 +107,7 @@ async function authLogin(req, res) {
         email: existingUser.email,
         role: existingUser.role,
       },
+      token,
       success: true,
     });
 
