@@ -87,7 +87,7 @@ async function authLogin(req, res) {
         username: existingUser.username,
       },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" } // token expiry
+      { expiresIn: "1d" } // token expiry
     );
 
     // Set cookie
@@ -118,14 +118,21 @@ async function authLogin(req, res) {
     return res.status(500).json({ message: "Internal server error", success: false });
   }
 }
-async function authLogout(req, res) {
+
+
+ async function authLogout(req, res) {
   try {
-    await res.clearCookie("token");
-    res.status(201).json({ message: "Logout Successfully !", success: true });
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: false, // same as when setting
+      sameSite: "lax", // same as when setting
+    });
+    res.status(200).json({ message: "Logout Successfully!", success: true });
   } catch (error) {
-    res.status(404).json({ message: "Failed to logout", success: false });
+    res.status(500).json({ message: "Failed to logout", success: false });
   }
 }
+
 
 async function getUsers(req, res) {
   try {
@@ -144,16 +151,44 @@ async function getUsers(req, res) {
 async function updateUser(req, res) {
   try {
     const { id } = req.params;
-    const { username, email } = req.body;
-    const updateUser = await User.findOneAndUpdate(id, { username, email });
-    if (!updateUser) {
-      return res.status(404).json({ message: "Error while updateing user" });
+    const { username, email, gender } = req.body;
+
+    // Generate profilePic
+    let placeholderImg;
+    if (gender === "male") {
+      placeholderImg = `https://avatar.iran.liara.run/public/boy?username=${username}`;
+    } else {
+      placeholderImg = `https://avatar.iran.liara.run/public/girl?username=${username}`;
     }
-    res
-      .status(201)
-      .json({ message: "update User successfully !", success: true });
+
+    // Check if email is already used by another user
+    const existingUser = await User.findOne({ email });
+    if (existingUser && existingUser._id.toString() !== id) {
+      return res.status(400).json({ message: "Email already in use by another user", success: false });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      { username, email, gender, profilePic: placeholderImg },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found", success: false });
+    }
+
+    res.status(200).json({
+      message: "User updated successfully!",
+      user: updatedUser,
+      success: true,
+    });
   } catch (error) {
-    res.status(404).json({ message: "failed to update user", success: false });
+    console.error("Update user error:", error);
+    res.status(500).json({ message: "Failed to update user", success: false });
   }
 }
+
+
+
+
 export { authRegister, authLogin, authLogout, getUsers ,updateUser };
