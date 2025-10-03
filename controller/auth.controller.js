@@ -56,59 +56,68 @@ async function authLogin(req, res) {
   try {
     const { email, password } = req.body;
 
+  
     if (!email || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
     if (password.length < 6) {
       return res
-        .status(401)
-        .json({ message: "Password length must be greater then 6" });
+        .status(400)
+        .json({ message: "Password must be at least 6 characters long" });
     }
 
+    // Check user
     const existingUser = await User.findOne({ email });
-
     if (!existingUser) {
-      return res.status(404).json({ message: "Invalid email or password" });
+      return res.status(401).json({ message: "Invalid email or password" });
     }
 
+    // Compare password
     const isMatch = await bcrypt.compare(password, existingUser.password);
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
+    // Generate JWT
     const token = jwt.sign(
       {
         _id: existingUser._id,
         email: existingUser.email,
         username: existingUser.username,
       },
-      process.env.JWT_SECRET
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" } // token expiry
     );
 
+    // Set cookie
     res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // true only in prod (HTTPS)
+      httpOnly: true, 
+      secure: process.env.NODE_ENV === "production", // HTTPS only in prod
       sameSite: "strict",
-      maxAge: 60 * 60 * 1000, // 1 hour in ms
+      maxAge: 60 * 60 * 1000, // 1 hour
     });
 
-    res
-      .status(201)
-      .json({
-        message: "Login successfully !",
-        existingUser,
-        success: true,
-        token,
-      });
+    // Success response
+    return res.status(200).json({
+      message: "Login successful!",
+      user: {
+        _id: existingUser._id,
+        username: existingUser.username,
+        email: existingUser.email,
+        role: existingUser.role,
+      },
+      success: true,
+    });
+
   } catch (error) {
-    res.status(404).json({ message: "Login Error", success: false });
+    console.error("Login error:", error.message);
+    return res.status(500).json({ message: "Internal server error", success: false });
   }
 }
-
 async function authLogout(req, res) {
   try {
-    await res.clearCookie("Token");
+    await res.clearCookie("token");
     res.status(201).json({ message: "Logout Successfully !", success: true });
   } catch (error) {
     res.status(404).json({ message: "Failed to logout", success: false });
