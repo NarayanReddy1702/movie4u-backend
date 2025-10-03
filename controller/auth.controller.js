@@ -80,7 +80,7 @@ async function authLogin(req, res) {
     const existingUser = await User.findOne({ email });
 
     if (!existingUser) {
-      res.status(404).json({ message: "Invalid email or password" });
+      return res.status(404).json({ message: "Invalid email or password" });
     }
 
     const isMatch = await bcrypt.compare(password, existingUser.password);
