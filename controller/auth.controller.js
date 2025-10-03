@@ -91,12 +91,12 @@ async function authLogin(req, res) {
     );
 
     // Set cookie
-    res.cookie("token", token, {
-      httpOnly: true, 
-      secure: process.env.NODE_ENV === "production", // HTTPS only in prod
-      sameSite: "strict",
-      maxAge: 60 * 60 * 1000, // 1 hour
-    });
+   res.cookie("token", token, {
+  httpOnly: true,
+  secure: false, // in development, false
+  sameSite: "lax", // allows cross-origin requests in dev
+  maxAge: 60 * 60 * 1000,
+});
 
     // Success response
     return res.status(200).json({
