@@ -44,17 +44,6 @@ async function authRegister(req, res) {
       return res.status(404).json({ message: "Failed to create user" });
     }
 
-    const token = jwt.sign(
-      {
-        _id: newUser._id,
-        email: newUser.email,
-        username: newUser.username,
-      },
-      process.env.JWT_SECRET
-    );
-
-    res.cookie("token", token);
-
     res
       .status(201)
       .json({ message: "Register successfully !", newUser, success: true });
