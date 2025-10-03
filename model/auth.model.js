@@ -24,6 +24,10 @@ const authUser = new Schema({
     type: String,
     enum: ["user", "admin"], 
     default: "user"
+  },
+  gender: {
+    type: String,
+    enum: ["male", "female"], 
   }
 },{timestamps:true})
 
