@@ -2,6 +2,7 @@ import User from "../model/auth.model.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 
+
 async function authRegister(req, res) {
   try {
     const { username, email, password, role ,gender} = req.body;
@@ -51,6 +52,7 @@ async function authRegister(req, res) {
     res.status(404).json({ message: "Auth Register error", success: false });
   }
 }
+
 
 async function authLogin(req, res) {
   try {
@@ -148,6 +150,7 @@ async function getUsers(req, res) {
   }
 }
 
+
 async function updateUser(req, res) {
   try {
     const { id } = req.params;
@@ -187,8 +190,6 @@ async function updateUser(req, res) {
     res.status(500).json({ message: "Failed to update user", success: false });
   }
 }
-
-
 
 
 export { authRegister, authLogin, authLogout, getUsers ,updateUser };
