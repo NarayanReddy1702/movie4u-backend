@@ -12,7 +12,7 @@ const upload = multer({ storage: storage })
 
 
 router.post("/addMovie",authMiddleware,upload.single("image"),addMovie)
-router.get("/",authMiddleware,allMovies)
+router.get("/",allMovies)
 router.put("/updateMovie/:id",authMiddleware,upload.single("image"),updateMovie)
 router.delete("/deleteMovie/:id",authMiddleware,deleteMovie)
 router.get("/movieView/:id",authMiddleware,getMovieView)
