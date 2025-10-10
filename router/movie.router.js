@@ -1,5 +1,5 @@
 import express from "express"
-import authMiddleware from "../middleware/auth.middleware.js"
+
 
 import multer from "multer"
 import { addMovie, allMovies, deleteMovie, getMovieView, updateMovie } from "../controller/movie.controller.js"
@@ -11,9 +11,9 @@ const upload = multer({ storage: storage })
 
 
 
-router.post("/addMovie",authMiddleware,upload.single("image"),addMovie)
-router.get("/",authMiddleware,allMovies)
-router.put("/updateMovie/:id",authMiddleware,upload.single("image"),updateMovie)
-router.delete("/deleteMovie/:id",authMiddleware,deleteMovie)
-router.get("/movieView/:id",authMiddleware,getMovieView)
+router.post("/addMovie",upload.single("image"),addMovie)
+router.get("/",allMovies)
+router.put("/updateMovie/:id",upload.single("image"),updateMovie)
+router.delete("/deleteMovie/:id",deleteMovie)
+router.get("/movieView/:id",getMovieView)
 export default router
