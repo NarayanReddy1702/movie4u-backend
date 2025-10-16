@@ -8,7 +8,8 @@ dotenv.config()
 
 const app=express()
 app.use(cors({
-    origin:"https://movie4u2025.netlify.app",
+    // origin:"https://movie4u2025.netlify.app",
+    origin:"http://localhost:5173",
     credentials:true
 }))
 

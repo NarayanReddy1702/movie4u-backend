@@ -2,10 +2,9 @@ import User from "../model/auth.model.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 
-
 async function authRegister(req, res) {
   try {
-    const { username, email, password, role ,gender} = req.body;
+    const { username, email, password, role, gender } = req.body;
 
     if (!username || !email || !password || !role || !gender) {
       return res.status(400).json({ message: "All fields are required" });
@@ -23,12 +22,14 @@ async function authRegister(req, res) {
       return res.status(409).json({ message: "User already registered" });
     }
 
-    var randowImage ;
-  if(gender==="male"){
-       randowImage = randowImage =`https://avatar.iran.liara.run/public/boy?username=${username}`
-  }else{
-     randowImage =  randowImage =`https://avatar.iran.liara.run/public/girl?username=${username}`
-  }
+    var randowImage;
+    if (gender === "male") {
+      randowImage =
+        randowImage = `https://avatar.iran.liara.run/public/boy?username=${username}`;
+    } else {
+      randowImage =
+        randowImage = `https://avatar.iran.liara.run/public/girl?username=${username}`;
+    }
 
     const hasPassword = await bcrypt.hash(password, 10);
 
@@ -38,7 +39,7 @@ async function authRegister(req, res) {
       password: hasPassword,
       profilePic: randowImage,
       role,
-      gender
+      gender,
     });
 
     if (!newUser) {
@@ -53,12 +54,10 @@ async function authRegister(req, res) {
   }
 }
 
-
 async function authLogin(req, res) {
   try {
     const { email, password } = req.body;
 
-  
     if (!email || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
@@ -93,12 +92,12 @@ async function authLogin(req, res) {
     );
 
     // Set cookie
-   res.cookie("token", token, {
-  httpOnly: true,
-  secure: false, // in development, false
-  sameSite: "lax", // allows cross-origin requests in dev
-  maxAge: 60 * 60 * 1000,
-});
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: false, // in development, false
+      sameSite: "lax", // allows cross-origin requests in dev
+      maxAge: 60 * 60 * 1000,
+    });
 
     // Success response
     return res.status(200).json({
@@ -108,21 +107,21 @@ async function authLogin(req, res) {
         username: existingUser.username,
         email: existingUser.email,
         role: existingUser.role,
-        profilePic:existingUser.profilePic,
-        gender:existingUser.gender
+        profilePic: existingUser.profilePic,
+        gender: existingUser.gender,
       },
       token,
       success: true,
     });
-
   } catch (error) {
     console.error("Login error:", error.message);
-    return res.status(500).json({ message: "Internal server error", success: false });
+    return res
+      .status(500)
+      .json({ message: "Internal server error", success: false });
   }
 }
 
-
- async function authLogout(req, res) {
+async function authLogout(req, res) {
   try {
     res.clearCookie("token", {
       httpOnly: true,
@@ -134,7 +133,6 @@ async function authLogin(req, res) {
     res.status(500).json({ message: "Failed to logout", success: false });
   }
 }
-
 
 async function getUsers(req, res) {
   try {
@@ -149,7 +147,6 @@ async function getUsers(req, res) {
     res.status(404).json({ message: "Failed to get all user", success: false });
   }
 }
-
 
 async function updateUser(req, res) {
   try {
@@ -167,7 +164,12 @@ async function updateUser(req, res) {
     // Check if email is already used by another user
     const existingUser = await User.findOne({ email });
     if (existingUser && existingUser._id.toString() !== id) {
-      return res.status(400).json({ message: "Email already in use by another user", success: false });
+      return res
+        .status(400)
+        .json({
+          message: "Email already in use by another user",
+          success: false,
+        });
     }
 
     const updatedUser = await User.findByIdAndUpdate(
@@ -177,7 +179,9 @@ async function updateUser(req, res) {
     );
 
     if (!updatedUser) {
-      return res.status(404).json({ message: "User not found", success: false });
+      return res
+        .status(404)
+        .json({ message: "User not found", success: false });
     }
 
     res.status(200).json({
@@ -191,5 +195,60 @@ async function updateUser(req, res) {
   }
 }
 
+async function deleteUser(req, res) {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res
+        .status(501)
+        .json({ message: "Failed to get ID", success: false });
+    }
 
-export { authRegister, authLogin, authLogout, getUsers ,updateUser };
+    await User.findOneAndDelete({ _id: id });
+
+    res
+      .status(201)
+      .json({ message: "Delete User Successfully !", success: true });
+  } catch (error) {
+    res.status(404).json({ message: "User Delete Error", success: false });
+  }
+}
+
+async function getOneUser(req, res) {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(404).json({ message: "UserId is Required !" });
+    }
+    const getOneUser = await User.findById(id);
+    if (!getOneUser) {
+      return res
+        .status(404)
+        .json({ message: "failed to  get one user", success: false });
+    }
+    res
+      .status(201)
+      .json({
+        message: "Get user Successfully !",
+        success: true,
+        user: {
+          username:getOneUser.username,
+          email:getOneUser.email,
+          gender:getOneUser.gender,
+          profilePic:getOneUser.profilePic
+        },
+      });
+  } catch (error) {
+    res.status(404).json({ message: "Failed to get one user", success: false });
+  }
+}
+
+export {
+  authRegister,
+  authLogin,
+  authLogout,
+  getUsers,
+  updateUser,
+  deleteUser,
+  getOneUser,
+};
