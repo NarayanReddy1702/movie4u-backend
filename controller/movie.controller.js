@@ -61,43 +61,75 @@ async function allMovies(req, res) {
   }
 }
 
-async function updateMovie(req, res) {
- try {
-   const {
-     title,
-     description,
-     category,
-     genres,
-     image,
-     releasedate,
-     year,
-     director,
-   } = req.body;
-   const { id } = req.params;
-   const { buffer } = req.file;
-   const imgDet = await fileUpload(buffer, uuid());
-   const updateMovie = await Movie.findByIdAndUpdate(
-     id,
-     {
-       title,
-       description,
-       category,
-       genres,
-       image: imgDet?.url,
-       releasedate,
-       year,
-       director,
-     }
-   );
-   if(!updateMovie){
-        return res.status(409).json({message:"Failed to update movie details"})
-   }
-   
-   res.status(201).json({message:"Update Movie SuccessFully !",success:true,updateMovie})
- } catch (error) {
-    res.status(404).json({message:"Update movie Error"})
- }
+
+ async function updateMovie(req, res) {
+  try {
+    const { id } = req.params;
+    const {
+      title,
+      description,
+      category,
+      genres,
+      releasedate,
+      year,
+      director,
+    } = req.body;
+
+    // Validate movie ID
+    if (!id) {
+      return res.status(400).json({ message: "Movie ID is required" });
+    }
+
+    // Fetch existing movie to check if it exists
+    const existingMovie = await Movie.findById(id);
+    if (!existingMovie) {
+      return res.status(404).json({ message: "Movie not found" });
+    }
+
+    // Handle image upload if a new file is provided
+    let imageUrl = existingMovie.image;
+    if (req.file?.buffer) {
+      const imgDet = await fileUpload(req.file.buffer, uuidv4());
+      imageUrl = imgDet?.url || existingMovie.image;
+    }
+
+    // Update the movie
+    const updatedMovie = await Movie.findByIdAndUpdate(
+      id,
+      {
+        title,
+        description,
+        category,
+        genres,
+        image: imageUrl,
+        releasedate,
+        year,
+        director,
+      },
+      { new: true }
+    );
+
+    if (!updatedMovie) {
+      return res
+        .status(409)
+        .json({ message: "Failed to update movie details" });
+    }
+
+    res
+      .status(200)
+      .json({
+        message: "Movie updated successfully!",
+        success: true,
+        movie: updatedMovie,
+      });
+  } catch (error) {
+    console.error("Error updating movie:", error);
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
+  }
 }
+
 
 async function deleteMovie(req,res) {
      try {
